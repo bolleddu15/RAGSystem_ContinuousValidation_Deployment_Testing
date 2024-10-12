@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 60%;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+        .history-box {
+            margin-top: 30px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .history-box h3 {
+            color: #555;
+        }
+        .query-item {
+            padding: 5px;
+            margin: 5px 0;
+            border-bottom: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Query Search System</h1>
+        <input type="text" id="queryInput" placeholder="Enter your query here...">
+        <button onclick="submitQuery()">Submit</button>
+
+        <div class="result-box" id="resultBox">
+            <h3>Answer:</h3>
+            <p id="answerText">Your answer will appear here.</p>
+        </div>
+
+        <div class="history-box" id="historyBox">
+            <h3>Query History</h3>
+            <div id="historyItems"></div>
+        </div>
+    </div>
+
+    <script>
+        const historyBox = document.getElementById('historyItems');
+
+        function submitQuery() {
+            const query = document.getElementById('queryInput').value;
+            if (query === '') {
+                alert('Please enter a query.');
+                return;
+            }
+
+            // Make a request to the backend (Flask) to get the answer for the query
+            fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the result
+                document.getElementById('answerText').innerText = data.answer;
+
+                // Add to query history
+                const queryItem = document.createElement('div');
+                queryItem.classList.add('query-item');
+                queryItem.innerText = query;
+                historyBox.appendChild(queryItem);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error occurred while processing the query.');
+            });
+        }
+    </script>
+
+</body>
+</html>
