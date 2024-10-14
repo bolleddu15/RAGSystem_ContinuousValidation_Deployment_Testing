@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive RAG Chat</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to the external CSS file -->
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Query History</h2>
+            <div class="history" id="history"></div>
+        </div>
+        <div class="main-content">
+            <div class="chat-header">Interactive RAG Chat</div>
+            <div class="chat-area" id="chatArea"></div>
+            <div class="input-area">
+                <input type="text" id="queryInput" placeholder="Type your query here..." />
+                <button onclick="submitQuery()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let queries = [];
+
+        function submitQuery() {
+            const query = document.getElementById('queryInput').value;
+
+            // Ensure the input is not empty
+            if (query.trim() !== "") {
+                fetch('/submit-query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    queries = data.queries;
+                    updateChat();
+                    updateHistory();
+                    document.getElementById('queryInput').value = ''; // Clear the input box
+                });
+            }
+        }
+
+        function updateChat() {
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML = ''; // Clear the current chat
+
+            queries.forEach(query => {
+                const queryDiv = document.createElement('div');
+                queryDiv.className = 'query';
+                queryDiv.textContent = query;
+                chatArea.appendChild(queryDiv);
+
+                const responseDiv = document.createElement('div');
+                responseDiv.className = 'response';
+                responseDiv.textContent = `Response for: ${query}`;
+                chatArea.appendChild(responseDiv);
+            });
+        }
+
+        function updateHistory() {
+            const history = document.getElementById('history');
+            history.innerHTML = ''; // Clear the current history
+
+            queries.forEach(query => {
+                const p = document.createElement('p');
+                p.textContent = query;
+                p.onclick = () => loadQuery(query);
+                history.appendChild(p);
+            });
+        }
+
+        function loadQuery(query) {
+            document.getElementById('queryInput').value = query;
+        }
+    </script>
+</body>
+</html>
